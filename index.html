@@ -54,7 +54,7 @@
 
         .products-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 1.5rem;
         }
 
@@ -132,6 +132,11 @@
             align-items: center;
             margin-bottom: 0.5rem;
         }
+
+        .out-of-stock {
+            color: red;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -172,9 +177,13 @@
 
     <script>
         const products = [
-            {id: 1, name: "Camisa Fitness", price: 79.90, img: "https://via.placeholder.com/150"},
-            {id: 2, name: "Tênis Esportivo", price: 199.90, img: "https://via.placeholder.com/150"},
-            {id: 3, name: "Short de Treino", price: 49.90, img: "https://via.placeholder.com/150"},
+            {
+                id: 1, 
+                name: "Camisa Poliesportiva Me and Gym", 
+                price: 89.90, 
+                stock: 10,
+                img: "https://i.ibb.co/N26nQnc/camisa-me-and-gym.png"
+            }
         ];
 
         const productsContainer = document.getElementById("products-container");
@@ -184,33 +193,59 @@
         const cartItemsContainer = document.getElementById("cart-items");
         const cartCount = document.getElementById("cart-count");
         const cartTotal = document.getElementById("cart-total");
+        const checkoutBtn = document.getElementById("checkout-btn");
 
         let cartItems = [];
 
         // Mostrar produtos
-        products.forEach(product => {
-            const productCard = document.createElement("div");
-            productCard.classList.add("product-card");
-            productCard.innerHTML = `
-                <img src="${product.img}" alt="${product.name}">
-                <h4>${product.name}</h4>
-                <p>R$ ${product.price.toFixed(2)}</p>
-                <button class="btn-blue" onclick="addToCart(${product.id})">Adicionar ao Carrinho</button>
-            `;
-            productsContainer.appendChild(productCard);
-        });
+        function renderProducts() {
+            productsContainer.innerHTML = "";
+            products.forEach(product => {
+                const productCard = document.createElement("div");
+                productCard.classList.add("product-card");
+                productCard.innerHTML = `
+                    <img src="${product.img}" alt="${product.name}">
+                    <h4>${product.name}</h4>
+                    <p>R$ ${product.price.toFixed(2)}</p>
+                    <p>Estoque: <span id="stock-${product.id}">${product.stock}</span></p>
+                    <button id="buy-${product.id}" class="btn-blue" ${product.stock <= 0 ? "disabled" : ""}>
+                        ${product.stock > 0 ? "Comprar" : "Esgotado"}
+                    </button>
+                `;
+                productsContainer.appendChild(productCard);
+
+                const btn = document.getElementById(`buy-${product.id}`);
+                btn.addEventListener("click", () => addToCart(product.id));
+            });
+        }
+
+        renderProducts();
 
         // Adicionar ao carrinho
         function addToCart(id) {
             const product = products.find(p => p.id === id);
+
+            if(product.stock <= 0){
+                alert("❌ Produto esgotado!");
+                return;
+            }
+
             const item = cartItems.find(i => i.id === id);
 
             if(item){
-                item.qty +=1;
+                if(item.qty < product.stock){
+                    item.qty +=1;
+                } else {
+                    alert("⚠️ Não há mais estoque disponível!");
+                    return;
+                }
             } else {
                 cartItems.push({...product, qty:1});
             }
+
+            product.stock -= 1;
             updateCart();
+            renderProducts();
         }
 
         // Atualizar carrinho
@@ -241,10 +276,42 @@
             cartCount.textContent = count;
         }
 
-        // Alterar quantidade
+        // Alterar quantidade no carrinho
         function changeQty(id, delta) {
             const item = cartItems.find(i => i.id === id);
+            const product = products.find(p => p.id === id);
+
             if(item){
-                item.qty += delta;
-                if(item.qty <= 0){
-                    cartItems = cartItems.filter
+                if(delta > 0 && product.stock > 0){
+                    item.qty += 1;
+                    product.stock -= 1;
+                } else if(delta < 0){
+                    item.qty -= 1;
+                    product.stock += 1;
+                    if(item.qty <= 0){
+                        cartItems = cartItems.filter(i => i.id !== id);
+                    }
+                }
+                updateCart();
+                renderProducts();
+            }
+        }
+
+        // Abrir/fechar carrinho
+        cartBtn.addEventListener("click", () => cart.classList.add("active"));
+        closeCartBtn.addEventListener("click", () => cart.classList.remove("active"));
+
+        // Checkout simulado
+        checkoutBtn.addEventListener("click", () => {
+            if(cartItems.length === 0){
+                alert("Seu carrinho está vazio!");
+                return;
+            }
+            alert("✅ Compra finalizada com sucesso! Obrigado por escolher a Me and Gym.");
+            cartItems = [];
+            updateCart();
+            cart.classList.remove("active");
+        });
+    </script>
+</body>
+</html>
