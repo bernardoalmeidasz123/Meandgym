@@ -1,126 +1,136 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Loja Virtual</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background-color: rgb(222, 224, 226);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            padding: 50px 0;
-        }
-
-        .product-card {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            text-align: center;
-            max-width: 300px;
-            margin-right: 50px;
-        }
-
-        .product-card img {
-            width: 100%;
-            border-radius: 10px;
-        }
-
-        .product-card h2 {
-            font-size: 1.5rem;
-            margin: 15px 0;
-        }
-
-        .product-card p {
-            font-size: 1.1rem;
-            margin: 10px 0;
-        }
-
-        .buy-button {
-            background-color: #5dade2; /* azul claro */
-            color: #fff;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .buy-button:hover {
-            background-color: #3498db;
-        }
-
-        .cart {
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 12px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            max-width: 300px;
-        }
-
-        .cart h2 {
-            margin-top: 0;
-        }
-
-        .checkout-button {
-            background-color: #2ecc71; /* verde */
-            color: #fff;
-            padding: 12px 25px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: background-color 0.3s;
-        }
-
-        .checkout-button:hover {
-            background-color: #27ae60;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Me and Gym - Loja</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background-color: #000;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: cyan;
+    }
+    .product {
+      background: #111;
+      border-radius: 12px;
+      padding: 20px;
+      margin: 20px auto;
+      width: 320px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.6);
+    }
+    .product img {
+      max-width: 100%;
+      border-radius: 8px;
+    }
+    .price {
+      font-size: 1.2rem;
+      margin: 10px 0;
+    }
+    .stock {
+      margin: 10px 0;
+      font-size: 1rem;
+      color: #f5f5f5;
+    }
+    .btn {
+      display: inline-block;
+      padding: 10px 18px;
+      margin: 8px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.3s;
+    }
+    .btn-buy {
+      background: #5dade2; /* azul claro */
+      color: white;
+    }
+    .btn-payment {
+      background: #28a745; /* verde pagamento */
+      color: white;
+    }
+    .btn:hover {
+      opacity: 0.8;
+    }
+    .cart {
+      margin-top: 20px;
+      background: #111;
+      border-radius: 12px;
+      padding: 15px;
+    }
+    .payment-options {
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
+  <h1>Me and Gym - Loja Oficial</h1>
 
-    <div class="product-card">
-        <img src="caminho/da/imagem.jpg" alt="Camisa Poliesportiva">
-        <h2>Camisa Poliesportiva</h2>
-        <p>R$ 120,00</p>
-        <button class="buy-button" onclick="addToCart()">Comprar</button>
+  <div class="product">
+    <img src="https://i.ibb.co/hmBN5sH/camisa-me-and-gym.png" alt="Camisa Me and Gym">
+    <h2>Camisa Poliesportiva Me and Gym</h2>
+    <p class="price">R$ 99,90</p>
+    <p class="stock">Estoque disponível: <span id="stock">10</span> unidades</p>
+    <button class="btn btn-buy" onclick="addToCart()">Comprar</button>
+  </div>
+
+  <div class="cart">
+    <h2>Carrinho</h2>
+    <p>Itens: <span id="cart-count">0</span></p>
+    <p>Total: R$ <span id="cart-total">0.00</span></p>
+
+    <div class="payment-options">
+      <button class="btn btn-payment" onclick="checkout('PIX')">PIX</button>
+      <button class="btn btn-payment" onclick="checkout('Crédito')">Cartão de Crédito</button>
+      <button class="btn btn-payment" onclick="checkout('Débito')">Cartão de Débito</button>
     </div>
+  </div>
 
-    <div class="cart">
-        <h2>Carrinho</h2>
-        <p>Quantidade: <span id="quantity">0</span></p>
-        <p>Total: R$ <span id="total">0</span></p>
-        <button class="checkout-button" onclick="checkout()">Checkout</button>
-    </div>
+  <!-- Sons -->
+  <audio id="sound-add" src="https://www.myinstants.com/media/sounds/cash-register.mp3"></audio>
+  <audio id="sound-checkout" src="https://www.myinstants.com/media/sounds/coin.mp3"></audio>
 
-    <script>
-        let quantity = 0;
-        const price = 120;
+  <script>
+    let stock = 10;
+    let cartCount = 0;
+    let cartTotal = 0;
+    const price = 99.90;
 
-        function addToCart() {
-            quantity++;
-            document.getElementById('quantity').textContent = quantity;
-            document.getElementById('total').textContent = (quantity * price).toFixed(2);
-        }
+    function addToCart() {
+      if (stock > 0) {
+        cartCount++;
+        cartTotal += price;
+        stock--;
 
-        function checkout() {
-            if(quantity === 0) {
-                alert("Seu carrinho está vazio!");
-            } else {
-                alert(`Obrigado pela compra!\nQuantidade: ${quantity}\nTotal: R$ ${(quantity * price).toFixed(2)}`);
-                // Resetar carrinho
-                quantity = 0;
-                document.getElementById('quantity').textContent = quantity;
-                document.getElementById('total').textContent = '0';
-            }
-        }
-    </script>
+        document.getElementById("cart-count").innerText = cartCount;
+        document.getElementById("cart-total").innerText = cartTotal.toFixed(2);
+        document.getElementById("stock").innerText = stock;
 
+        document.getElementById("sound-add").play();
+      } else {
+        alert("Produto esgotado!");
+      }
+    }
+
+    function checkout(paymentMethod) {
+      if (cartCount > 0) {
+        document.getElementById("sound-checkout").play();
+        alert(`Compra finalizada com sucesso!\nPagamento: ${paymentMethod}\nItens: ${cartCount}\nTotal: R$ ${cartTotal.toFixed(2)}`);
+        // Resetar carrinho
+        cartCount = 0;
+        cartTotal = 0;
+        document.getElementById("cart-count").innerText = cartCount;
+        document.getElementById("cart-total").innerText = cartTotal.toFixed(2);
+      } else {
+        alert("Carrinho vazio!");
+      }
+    }
+  </script>
 </body>
 </html>
