@@ -4,7 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Me and Gym - Loja</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #000;
+            color: #fff;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #111;
+            padding: 1rem 2rem;
+        }
+
+        header .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        header nav a {
+            color: #fff;
+            text-decoration: none;
+            margin-right: 1rem;
+        }
+
+        header nav a:hover {
+            text-decoration: underline;
+        }
+
+        .cart-icon {
+            cursor: pointer;
+        }
+
+        main {
+            padding: 2rem;
+        }
+
+        #produtos {
+            margin-top: 2rem;
+        }
+
+        .products-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: #111;
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 6px rgba(255,255,255,0.1);
+        }
+
+        .product-card img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .btn-blue, .btn-red, .qty-btn {
+            padding: 0.5rem 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: #fff;
+            margin: 0.2rem;
+        }
+
+        .btn-blue {
+            background-color: #007bff;
+        }
+
+        .btn-blue:hover {
+            background-color: #0056b3;
+        }
+
+        .btn-red {
+            background-color: #dc3545;
+        }
+
+        .btn-red:hover {
+            background-color: #a71d2a;
+        }
+
+        .qty-btn {
+            background-color: #444;
+        }
+
+        .qty-btn:hover {
+            background-color: #666;
+        }
+
+        /* Carrinho */
+        .cart {
+            position: fixed;
+            right: -350px;
+            top: 0;
+            width: 350px;
+            height: 100%;
+            background-color: #111;
+            box-shadow: -2px 0 6px rgba(0,0,0,0.3);
+            padding: 1rem;
+            transition: right 0.3s ease;
+            z-index: 1000;
+        }
+
+        .cart.active {
+            right: 0;
+        }
+
+        .cart h3 {
+            margin-bottom: 1rem;
+        }
+
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+    </style>
 </head>
 <body>
     <header>
@@ -42,6 +170,81 @@
         <button class="btn-red" id="close-cart">Fechar</button>
     </div>
 
-    <script src="script.js"></script>
-</body>
-</html>
+    <script>
+        const products = [
+            {id: 1, name: "Camisa Fitness", price: 79.90, img: "https://via.placeholder.com/150"},
+            {id: 2, name: "Tênis Esportivo", price: 199.90, img: "https://via.placeholder.com/150"},
+            {id: 3, name: "Short de Treino", price: 49.90, img: "https://via.placeholder.com/150"},
+        ];
+
+        const productsContainer = document.getElementById("products-container");
+        const cartBtn = document.getElementById("cart-btn");
+        const cart = document.getElementById("cart");
+        const closeCartBtn = document.getElementById("close-cart");
+        const cartItemsContainer = document.getElementById("cart-items");
+        const cartCount = document.getElementById("cart-count");
+        const cartTotal = document.getElementById("cart-total");
+
+        let cartItems = [];
+
+        // Mostrar produtos
+        products.forEach(product => {
+            const productCard = document.createElement("div");
+            productCard.classList.add("product-card");
+            productCard.innerHTML = `
+                <img src="${product.img}" alt="${product.name}">
+                <h4>${product.name}</h4>
+                <p>R$ ${product.price.toFixed(2)}</p>
+                <button class="btn-blue" onclick="addToCart(${product.id})">Adicionar ao Carrinho</button>
+            `;
+            productsContainer.appendChild(productCard);
+        });
+
+        // Adicionar ao carrinho
+        function addToCart(id) {
+            const product = products.find(p => p.id === id);
+            const item = cartItems.find(i => i.id === id);
+
+            if(item){
+                item.qty +=1;
+            } else {
+                cartItems.push({...product, qty:1});
+            }
+            updateCart();
+        }
+
+        // Atualizar carrinho
+        function updateCart() {
+            cartItemsContainer.innerHTML = "";
+            let total = 0;
+            let count = 0;
+
+            cartItems.forEach(item => {
+                total += item.price * item.qty;
+                count += item.qty;
+
+                const cartItem = document.createElement("div");
+                cartItem.classList.add("cart-item");
+                cartItem.innerHTML = `
+                    <span>${item.name}</span>
+                    <div>
+                        <button class="qty-btn" onclick="changeQty(${item.id}, -1)">-</button>
+                        ${item.qty}
+                        <button class="qty-btn" onclick="changeQty(${item.id}, 1)">+</button>
+                    </div>
+                    <span>R$ ${(item.price * item.qty).toFixed(2)}</span>
+                `;
+                cartItemsContainer.appendChild(cartItem);
+            });
+
+            cartTotal.textContent = total.toFixed(2);
+            cartCount.textContent = count;
+        }
+
+        // Alterar quantidade
+        function changeQty(id, delta) {
+            const item = cartItems.find(i => i.id === id);
+            if(item){
+                item.qty += delta;
+                if(item.qty <= 0){
+                    cartItems = cartItems.filter
